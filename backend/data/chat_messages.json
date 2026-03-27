@@ -1,0 +1,74 @@
+[
+  {
+    "id": "mcq-quickcheck-1",
+    "group": "student",
+    "type": "mcq_quick_check",
+    "title": "Student MCQs (Quick Check)",
+    "description": "Short MCQs to reinforce retention and intervention best practices.",
+    "questions": [
+      {
+        "question": "If attendance drops below 60%, what should be the first action?",
+        "options": [
+          "Ignore for one month",
+          "Plan immediate mentor/counselor follow-up",
+          "Only send exam timetable",
+          "Wait for semester end"
+        ],
+        "answer": 1
+      },
+      {
+        "question": "Which habit most improves long-term retention?",
+        "options": [
+          "Passive re-reading only",
+          "Active recall and spaced repetition",
+          "Studying only before exams",
+          "Skipping revision"
+        ],
+        "answer": 1
+      },
+      {
+        "question": "For Arjun Kumar 263, the strongest current focus area is:",
+        "options": [
+          "No intervention required",
+          "Attendance, academic recovery, and stress support",
+          "Only extracurricular activity",
+          "Reduce counselor engagement"
+        ],
+        "answer": 1
+      }
+    ]
+  },
+  {
+    "id": "1",
+    "group": "student",
+    "text": "Welcome to the Student Group chat!",
+    "sender_name": "Student 1",
+    "sender_role": "student",
+    "sender_email": "student1@example.com",
+    "important": false,
+    "notify_students": false,
+    "created_at": "2026-03-27T10:00:00Z"
+  },
+  {
+    "id": "2",
+    "group": "teacher",
+    "text": "Welcome to the Teacher Group chat!",
+    "sender_name": "Teacher 1",
+    "sender_role": "teacher",
+    "sender_email": "teacher1@example.com",
+    "important": true,
+    "notify_students": true,
+    "created_at": "2026-03-27T10:05:00Z"
+  },
+  {
+    "id": "b230afba-b2e1-4413-b38b-655c4029b982",
+    "group": "teacher",
+    "text": "hii",
+    "sender_name": "Teacher User",
+    "sender_role": "teacher",
+    "sender_email": "teacher@example.com",
+    "important": true,
+    "notify_students": true,
+    "created_at": "2026-03-27T15:44:38.396576+00:00"
+  }
+]

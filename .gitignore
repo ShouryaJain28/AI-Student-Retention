@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyd
+.Python
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+pip-wheel-metadata/
+venv/
+.venv/
+env/
+.env
+**/.env.local
+
+# Node / Vite
+node_modules/
+dist/
+.vite/
+coverage/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+
+# Local databases / artifacts
+*.sqlite3
+backend/instance/
+backend/training/artifacts/
+backend/data/users.json
+backend/data/students.json
+backend/data/documents/
+
+# Optional training label files (Access-based mode)

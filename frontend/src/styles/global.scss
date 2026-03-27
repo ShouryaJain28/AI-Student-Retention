@@ -1,0 +1,141 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,500,0,0");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --primary-deep: #0f172a;
+  --secondary-deep: #1e293b;
+  --accent-blue: #111827;
+  --accent-blue-strong: #000000;
+  --accent-green: #22c55e;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+body {
+  @apply m-0 bg-white text-black antialiased dark:bg-black dark:text-white;
+  font-family: "Space Grotesk", "Inter", sans-serif;
+  font-size: 1.18rem;
+  line-height: 1.75;
+}
+
+.glass {
+  @apply rounded-xl border border-slate-200/80 bg-white shadow-lg backdrop-blur-xl dark:border-white/20 dark:bg-slate-900;
+}
+
+.glass-card {
+  @apply rounded-xl border border-slate-200/80 bg-white shadow-md backdrop-blur-xl dark:border-white/20 dark:bg-slate-900;
+  box-shadow:
+    inset 0 0 0 1px rgba(99, 102, 241, 0.08),
+    0 10px 24px rgba(15, 23, 42, 0.08);
+}
+
+.ghost-btn {
+  @apply inline-flex items-center gap-2 rounded-lg border border-slate-300/80 bg-white px-3 py-2 text-base text-black transition hover:bg-slate-100 disabled:opacity-50 dark:border-white/25 dark:bg-slate-900 dark:text-white dark:hover:bg-white/10;
+}
+
+.primary-btn {
+  @apply rounded-lg px-4 py-2 font-semibold text-white transition hover:brightness-105 disabled:opacity-60;
+  background: linear-gradient(90deg, var(--accent-blue), var(--accent-blue-strong));
+}
+
+.input {
+  @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-lg text-black outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-white/25 dark:bg-slate-900 dark:text-white;
+}
+
+input,
+select,
+textarea {
+  @apply text-base;
+}
+
+label {
+  @apply text-base;
+}
+
+input[type="checkbox"] {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.chart-card {
+  @apply glass-card p-4;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: "Space Grotesk", "Inter", sans-serif;
+  line-height: 1.25;
+}
+
+p,
+li,
+td,
+th,
+label,
+input,
+select,
+textarea {
+  font-size: 1.12rem;
+}
+
+.page-title {
+  @apply text-4xl font-bold md:text-4xl;
+}
+
+.page-description {
+  @apply text-xl md:text-2xl;
+}
+
+.section-title {
+  @apply text-3xl font-semibold;
+}
+
+.section-description {
+  @apply text-xl text-black dark:text-white;
+}
+
+.gicon {
+  font-family: "Material Symbols Rounded";
+  font-weight: 500;
+  font-style: normal;
+  font-size: 1.2rem;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "liga";
+  vertical-align: text-bottom;
+}
+
+.skeleton {
+  @apply animate-pulse bg-white/10;
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  opacity: 0;
+  animation: fade-in-up 0.45s ease forwards;
+}

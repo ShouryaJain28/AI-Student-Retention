@@ -1,0 +1,21 @@
+.shell {
+  position: relative;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(circle at 8% 5%, rgba(255, 255, 255, 0.92), transparent 40%),
+      radial-gradient(circle at 100% 100%, rgba(241, 245, 249, 0.72), transparent 34%);
+  }
+}
+
+.shellDark {
+  &::before {
+    background:
+      radial-gradient(circle at 8% 5%, rgba(148, 163, 184, 0.14), transparent 40%),
+      radial-gradient(circle at 100% 100%, rgba(30, 41, 59, 0.24), transparent 34%);
+  }
+}
