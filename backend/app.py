@@ -9,7 +9,7 @@ import os
 from pathlib import Path
 
 from dotenv import load_dotenv
-from flask import Flask, jsonify
+from flask import Flask, jsonify, send_from_directory
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 
@@ -26,7 +26,10 @@ def create_app() -> Flask:
     env_path = Path(__file__).resolve().parent / ".env"
     load_dotenv(dotenv_path=env_path)
 
-    app = Flask(__name__)
+    project_root = Path(__file__).resolve().parents[1]
+    frontend_dist = project_root / "frontend" / "dist"
+
+    app = Flask(__name__, static_folder=str(frontend_dist), static_url_path="/")
     # Core security and token configuration.
     app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "change-this-in-production-min-32-characters")
     app.config["JWT_ACCESS_TOKEN_EXPIRES"] = int(os.getenv("JWT_EXPIRES_SEC", "86400"))
@@ -48,6 +51,25 @@ def create_app() -> Flask:
     @app.get("/health")
     def health():
         return jsonify({"ok": True, "service": "student-retention-api-v2"})
+
+    @app.get("/")
+    def serve_frontend_index():
+        index_file = frontend_dist / "index.html"
+        if index_file.exists():
+            return send_from_directory(frontend_dist, "index.html")
+        return jsonify({"ok": True, "message": "Frontend build not found. Build frontend/dist for production serving."})
+
+    @app.get("/<path:asset_path>")
+    def serve_frontend_assets(asset_path: str):
+        index_file = frontend_dist / "index.html"
+        requested = frontend_dist / asset_path
+
+        if requested.is_file():
+            return send_from_directory(frontend_dist, asset_path)
+        if index_file.exists():
+            # SPA fallback for client-side routing.
+            return send_from_directory(frontend_dist, "index.html")
+        return jsonify({"error": "Not found"}), 404
 
     return app
 

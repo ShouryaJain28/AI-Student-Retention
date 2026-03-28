@@ -159,6 +159,21 @@ Frontend runs at:
 - If frontend cannot reach backend, start backend first and verify `/health`.
 - If `npm run backend` says Python is missing, install Python 3.11+ and re-run the setup steps.
 
+# Deploy (Render, Single Service)
+
+This repo includes a production `Dockerfile` and `render.yaml` so frontend + backend can be deployed together.
+
+## Steps
+1. Push this repo to GitHub.
+2. In Render, choose **New +** -> **Blueprint** and connect your repo.
+3. Render will detect `render.yaml` and create the `ai-student-retention` web service.
+4. In Render service environment variables, set:
+   - `GOOGLE_CLIENT_ID` = your OAuth client id
+5. Deploy and open the service URL.
+
+Health endpoint:
+- `https://<your-render-domain>/health`
+
 # Use cases
 - Academic advisors prioritizing at-risk students
 - Teachers identifying class-level risk drivers

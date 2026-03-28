@@ -1,6 +1,23 @@
 import axios from "axios";
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:5000").replace(/\/$/, "");
+function getDefaultApiBaseUrl() {
+  if (typeof window !== "undefined" && window?.location?.hostname) {
+    const protocol = window.location.protocol || "http:";
+    const hostname = window.location.hostname;
+    const port = window.location.port;
+
+    // Local Vite dev -> backend stays on 5000.
+    if (port === "5300" || port === "5173") {
+      return `${protocol}//${hostname}:5000`;
+    }
+
+    // Production/same-origin fallback.
+    return `${protocol}//${hostname}${port ? `:${port}` : ""}`;
+  }
+  return "http://127.0.0.1:5000";
+}
+
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || getDefaultApiBaseUrl()).replace(/\/$/, "");
 
 export const api = axios.create({
   baseURL: API_BASE_URL,

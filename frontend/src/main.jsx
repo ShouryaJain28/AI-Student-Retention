@@ -8,8 +8,23 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import "./styles/global.scss";
 
-// API base URL is configurable; fallback supports local backend runs.
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:5000").replace(/\/$/, "");
+function getDefaultApiBaseUrl() {
+  if (typeof window !== "undefined" && window?.location?.hostname) {
+    const protocol = window.location.protocol || "http:";
+    const hostname = window.location.hostname;
+    const port = window.location.port;
+
+    if (port === "5300" || port === "5173") {
+      return `${protocol}//${hostname}:5000`;
+    }
+
+    return `${protocol}//${hostname}${port ? `:${port}` : ""}`;
+  }
+  return "http://127.0.0.1:5000";
+}
+
+// API base URL is configurable; fallback supports local and deployed runs.
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || getDefaultApiBaseUrl()).replace(/\/$/, "");
 
 const app = (
   <React.StrictMode>
