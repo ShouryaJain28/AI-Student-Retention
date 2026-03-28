@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navigate, useSearchParams } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
-import { jwtDecode } from "jwt-decode";
+import toast from "react-hot-toast";
 import { useAuth } from "../contexts/AuthContext";
 
 const ROLES = ["student"];
@@ -37,21 +37,7 @@ export default function LoginPage() {
   const handleGoogle = async (credentialResponse) => {
     const token = credentialResponse?.credential;
     if (!token) return;
-
-    let profile = {};
-    try {
-      profile = jwtDecode(token);
-    } catch {
-      profile = {};
-    }
-
-    await loginWithGoogle({
-      token,
-      email: profile?.email,
-      name: profile?.name,
-      // Role stays user-selectable for multi-role onboarding.
-      role: form.role,
-    });
+    await loginWithGoogle({ token, role: form.role });
   };
 
   return (
@@ -102,7 +88,7 @@ export default function LoginPage() {
                 <div className="pt-2">
                   {/* Google button appears only when backend exposes a client id. */}
                   {isGoogleEnabled ? (
-                    <GoogleLogin onSuccess={handleGoogle} onError={() => null} />
+                    <GoogleLogin onSuccess={handleGoogle} onError={() => toast.error("Google sign-in failed. Please try again.")} />
                   ) : (
                     <p className="text-xs text-slate-500 dark:text-slate-400">Set GOOGLE_CLIENT_ID in backend/.env to enable Google sign-in.</p>
                   )}

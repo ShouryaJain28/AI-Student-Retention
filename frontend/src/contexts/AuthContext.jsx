@@ -21,6 +21,9 @@ export function AuthProvider({ children }) {
   }, []);
 
   const saveSession = (sessionToken, sessionUser) => {
+    if (!sessionToken || !sessionUser) {
+      throw new Error("Invalid authentication response from server");
+    }
     setToken(sessionToken);
     setUser(sessionUser);
     localStorage.setItem("sr_token", sessionToken);
@@ -35,7 +38,7 @@ export function AuthProvider({ children }) {
       toast.success("Welcome back");
       return true;
     } catch (error) {
-      toast.error(error?.response?.data?.error || "Login failed");
+      toast.error(error?.response?.data?.error || error?.message || "Login failed");
       return false;
     } finally {
       setLoading(false);
@@ -50,7 +53,7 @@ export function AuthProvider({ children }) {
       toast.success("Account created");
       return true;
     } catch (error) {
-      toast.error(error?.response?.data?.error || "Signup failed");
+      toast.error(error?.response?.data?.error || error?.message || "Signup failed");
       return false;
     } finally {
       setLoading(false);
@@ -65,7 +68,7 @@ export function AuthProvider({ children }) {
       toast.success("Signed in with Google");
       return true;
     } catch (error) {
-      toast.error(error?.response?.data?.error || "Google login failed");
+      toast.error(error?.response?.data?.error || error?.message || "Google login failed");
       return false;
     } finally {
       setLoading(false);
@@ -80,7 +83,7 @@ export function AuthProvider({ children }) {
       toast.success(res.data.message || "Profile updated");
       return true;
     } catch (error) {
-      toast.error(error?.response?.data?.error || "Profile update failed");
+      toast.error(error?.response?.data?.error || error?.message || "Profile update failed");
       return false;
     } finally {
       setLoading(false);
@@ -94,7 +97,7 @@ export function AuthProvider({ children }) {
       toast.success(res.data?.message || "Password reset successful");
       return true;
     } catch (error) {
-      toast.error(error?.response?.data?.error || "Password reset failed");
+      toast.error(error?.response?.data?.error || error?.message || "Password reset failed");
       return false;
     } finally {
       setLoading(false);

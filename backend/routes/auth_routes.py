@@ -1,6 +1,11 @@
 from __future__ import annotations
 
+import base64
+import hashlib
+import hmac
+import json
 import os
+import re
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -15,6 +20,8 @@ from ..utils.storage import load_students, load_users, save_users
 
 auth_bp = Blueprint("auth", __name__)
 ALLOWED_DOC_EXTENSIONS = {"pdf", "png", "jpg", "jpeg", "doc", "docx", "txt"}
+ALLOWED_ROLES = {"student", "teacher", "admin"}
+LEGACY_SHA256_PATTERN = re.compile(r"^[a-f0-9]{64}$")
 ROOT = Path(__file__).resolve().parents[1]
 UPLOADS_DIR = ROOT / "data" / "documents"
 
@@ -52,6 +59,54 @@ def _find_user_by_email(users: list[dict[str, Any]], email: str) -> tuple[int | 
     if index is None:
         return None, None
     return index, users[index]
+
+
+def _normalize_role(raw_role: Any, default: str = "student") -> str:
+    role = str(raw_role or default).strip().lower() or default
+    return role if role in ALLOWED_ROLES else default
+
+
+def _password_matches(stored_hash: str, candidate_password: str) -> bool:
+    if not stored_hash or not candidate_password:
+        return False
+
+    # Preferred path for werkzeug-generated password hashes.
+    try:
+        if check_password_hash(stored_hash, candidate_password):
+            return True
+    except Exception:
+        pass
+
+    # Compatibility path for older plain SHA256 hex digests.
+    normalized_hash = stored_hash.strip().lower()
+    if LEGACY_SHA256_PATTERN.fullmatch(normalized_hash):
+        computed_hash = hashlib.sha256(candidate_password.encode("utf-8")).hexdigest()
+        return hmac.compare_digest(normalized_hash, computed_hash)
+
+    return False
+
+
+def _decode_jwt_payload_without_verification(token: str) -> dict[str, Any]:
+    parts = str(token or "").split(".")
+    if len(parts) != 3:
+        return {}
+
+    payload_segment = parts[1]
+    payload_segment += "=" * (-len(payload_segment) % 4)
+    try:
+        payload_bytes = base64.urlsafe_b64decode(payload_segment.encode("utf-8"))
+        payload = json.loads(payload_bytes.decode("utf-8"))
+        return payload if isinstance(payload, dict) else {}
+    except Exception:
+        return {}
+
+
+def _google_audience_matches(audience: Any, expected_client_id: str) -> bool:
+    if not expected_client_id:
+        return True
+    if isinstance(audience, list):
+        return expected_client_id in [str(item).strip() for item in audience]
+    return str(audience or "").strip() == expected_client_id
 
 
 def _infer_student_id(email: str, name: str) -> int | None:
@@ -103,7 +158,7 @@ def signup() -> Any:
     payload = request.get_json(silent=True) or {}
     email = str(payload.get("email", "")).strip().lower()
     password = str(payload.get("password", "")).strip()
-    role = str(payload.get("role", "teacher")).strip().lower()
+    role = _normalize_role(payload.get("role"), default="student")
     name = str(payload.get("name", "User")).strip()
     student_id_raw = payload.get("student_id")
     student_id = int(student_id_raw) if student_id_raw not in (None, "") else None
@@ -148,7 +203,8 @@ def login() -> Any:
 
     users = load_users()
     user_index, user = _find_user_by_email(users, email)
-    if user is None or not check_password_hash(user["password_hash"], password):
+    stored_hash = str((user or {}).get("password_hash", "")).strip()
+    if user is None or not _password_matches(stored_hash, password):
         return jsonify({"error": "Invalid credentials"}), 401
 
     if user.get("role") == "student" and user.get("student_id") in (None, ""):
@@ -195,12 +251,24 @@ def forgot_password() -> Any:
 def login_google() -> Any:
     payload = request.get_json(silent=True) or {}
     token = str(payload.get("token", "")).strip()
-    email = str(payload.get("email", "")).strip().lower()
-    name = str(payload.get("name", "Google User")).strip() or "Google User"
-    role = str(payload.get("role", "teacher")).strip().lower() or "teacher"
+    provided_email = str(payload.get("email", "")).strip().lower()
+    provided_name = str(payload.get("name", "")).strip()
+    role = _normalize_role(payload.get("role"), default="student")
 
     if not token:
         return jsonify({"error": "Missing Google token"}), 400
+
+    token_claims = _decode_jwt_payload_without_verification(token)
+    configured_client_id = str(os.getenv("GOOGLE_CLIENT_ID", "")).strip()
+
+    if token_claims and configured_client_id and not _google_audience_matches(token_claims.get("aud"), configured_client_id):
+        return jsonify({"error": "Invalid Google token audience"}), 401
+
+    if token_claims.get("email_verified") is False:
+        return jsonify({"error": "Google account email is not verified"}), 401
+
+    email = provided_email or str(token_claims.get("email", "")).strip().lower()
+    name = provided_name or str(token_claims.get("name") or token_claims.get("given_name") or "Google User").strip() or "Google User"
 
     if not email:
         return jsonify({"error": "Google email not available. Ensure profile email scope is enabled."}), 400

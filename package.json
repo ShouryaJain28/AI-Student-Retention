@@ -1,0 +1,11 @@
+{
+  "name": "ai-student-retention",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "backend": "powershell -ExecutionPolicy Bypass -File scripts/start-backend.ps1",
+    "frontend": "powershell -ExecutionPolicy Bypass -File scripts/start-frontend.ps1",
+    "frontend:oauth": "npm --prefix frontend run frontend:oauth",
+    "install:frontend": "npm --prefix frontend install"
+  }
+}
