@@ -27,12 +27,19 @@ const app = (
 const root = createRoot(document.getElementById("root"));
 
 async function bootstrap() {
+  window.__SR_GOOGLE_ENABLED__ = false;
+  window.__SR_BACKEND_UP__ = false;
+
   try {
     // Backend owns Google OAuth config so frontend env is optional.
     const response = await fetch(`${API_BASE_URL}/auth/google-config`);
+    if (!response.ok) {
+      throw new Error(`Backend responded with ${response.status}`);
+    }
     const data = await response.json();
     const googleClientId = (data?.clientId || "").trim();
 
+    window.__SR_BACKEND_UP__ = true;
     window.__SR_GOOGLE_ENABLED__ = Boolean(googleClientId);
 
     if (googleClientId) {
@@ -41,6 +48,7 @@ async function bootstrap() {
       return;
     }
   } catch {
+    window.__SR_BACKEND_UP__ = false;
     window.__SR_GOOGLE_ENABLED__ = false;
   }
 

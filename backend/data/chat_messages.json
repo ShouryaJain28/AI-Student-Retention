@@ -69,6 +69,7 @@
     "sender_email": "teacher@example.com",
     "important": true,
     "notify_students": true,
-    "created_at": "2026-03-27T15:44:38.396576+00:00"
+    "created_at": "2026-03-27T15:44:38.396576+00:00",
+    "sender_user_id": 2
   }
 ]

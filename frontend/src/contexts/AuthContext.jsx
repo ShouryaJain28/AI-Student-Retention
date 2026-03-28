@@ -30,6 +30,17 @@ export function AuthProvider({ children }) {
     localStorage.setItem("sr_user", JSON.stringify(sessionUser));
   };
 
+  const resolveAuthError = (error, fallbackMessage) => {
+    const apiMessage = error?.response?.data?.error;
+    if (apiMessage) return apiMessage;
+
+    if (error?.code === "ERR_NETWORK") {
+      return "Cannot reach backend API. Start backend on http://127.0.0.1:5000 and try again.";
+    }
+
+    return error?.message || fallbackMessage;
+  };
+
   const login = async (payload) => {
     setLoading(true);
     try {
@@ -38,7 +49,7 @@ export function AuthProvider({ children }) {
       toast.success("Welcome back");
       return true;
     } catch (error) {
-      toast.error(error?.response?.data?.error || error?.message || "Login failed");
+      toast.error(resolveAuthError(error, "Login failed"));
       return false;
     } finally {
       setLoading(false);
@@ -53,7 +64,7 @@ export function AuthProvider({ children }) {
       toast.success("Account created");
       return true;
     } catch (error) {
-      toast.error(error?.response?.data?.error || error?.message || "Signup failed");
+      toast.error(resolveAuthError(error, "Signup failed"));
       return false;
     } finally {
       setLoading(false);
@@ -68,7 +79,7 @@ export function AuthProvider({ children }) {
       toast.success("Signed in with Google");
       return true;
     } catch (error) {
-      toast.error(error?.response?.data?.error || error?.message || "Google login failed");
+      toast.error(resolveAuthError(error, "Google login failed"));
       return false;
     } finally {
       setLoading(false);
@@ -83,7 +94,7 @@ export function AuthProvider({ children }) {
       toast.success(res.data.message || "Profile updated");
       return true;
     } catch (error) {
-      toast.error(error?.response?.data?.error || error?.message || "Profile update failed");
+      toast.error(resolveAuthError(error, "Profile update failed"));
       return false;
     } finally {
       setLoading(false);
@@ -97,7 +108,7 @@ export function AuthProvider({ children }) {
       toast.success(res.data?.message || "Password reset successful");
       return true;
     } catch (error) {
-      toast.error(error?.response?.data?.error || error?.message || "Password reset failed");
+      toast.error(resolveAuthError(error, "Password reset failed"));
       return false;
     } finally {
       setLoading(false);

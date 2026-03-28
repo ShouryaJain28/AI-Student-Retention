@@ -12,6 +12,7 @@ export default function LoginPage() {
   const [mode, setMode] = useState("login");
   const [form, setForm] = useState({ name: "", email: "", password: "", role: "student" });
   const isGoogleEnabled = typeof window !== "undefined" && Boolean(window.__SR_GOOGLE_ENABLED__);
+  const isBackendUp = typeof window === "undefined" ? true : window.__SR_BACKEND_UP__ !== false;
 
   useEffect(() => {
     const requestedMode = searchParams.get("mode");
@@ -55,6 +56,12 @@ export default function LoginPage() {
               </div>
 
               <form className="mt-4 space-y-3" onSubmit={submit}>
+                {!isBackendUp && (
+                  <p className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                    Backend is not running. Start it with <span className="font-semibold">npm run backend</span>, then refresh this page.
+                  </p>
+                )}
+
                 {mode === "signup" && (
                   <input
                     className="input"
@@ -90,7 +97,11 @@ export default function LoginPage() {
                   {isGoogleEnabled ? (
                     <GoogleLogin onSuccess={handleGoogle} onError={() => toast.error("Google sign-in failed. Please try again.")} />
                   ) : (
-                    <p className="text-xs text-slate-500 dark:text-slate-400">Set GOOGLE_CLIENT_ID in backend/.env to enable Google sign-in.</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      {isBackendUp
+                        ? "Set GOOGLE_CLIENT_ID in backend/.env to enable Google sign-in."
+                        : "Google sign-in is unavailable while backend is offline."}
+                    </p>
                   )}
                 </div>
               </form>
