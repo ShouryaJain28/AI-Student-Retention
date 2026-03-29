@@ -86,7 +86,7 @@ How It Works
 
 # Setup (Easy Local Setup)
 
-> Run all commands from the project root (`AI-Student-Retention`) unless noted.
+> Run all commands from the project root (`fosshack`) unless noted.
 
 ## Prerequisites
 - Python 3.11+
@@ -97,82 +97,43 @@ How It Works
 
 ```bash
 git clone <your-repo-url>
-cd AI-Student-Retention
+cd fosshack
 ```
 
 ## 2) Install backend dependencies
 
 ```powershell
 py -3 -m venv .venv
-.\.venv\Scripts\python.exe -m pip install --upgrade pip
-.\.venv\Scripts\python.exe -m pip install -r backend\requirements.txt
+.\.venv\Scripts\activate
+pip install --upgrade pip
+pip install -r backend\requirements.txt
 ```
-If `py` is not available on your machine, use `python -m venv .venv` instead.
+If `py` is not available, use `python -m venv .venv` instead.
 
 ## 3) Install frontend dependencies
 
 ```powershell
-npm --prefix frontend install
+cd frontend
+npm install
+cd ..
 ```
 
-## 4) Add environment file
+## 4) Add environment files
 
-Create `frontend/.env.local`:
-
-```env
-VITE_API_BASE_URL=http://127.0.0.1:5000
-```
-
-Set your Google OAuth client id in `backend/.env`:
-
-```env
-GOOGLE_CLIENT_ID=YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com
-```
-
-For Google OAuth local use, add this in Google Cloud Console (`Authorized JavaScript origins`):
-- `http://localhost:5300`
-
-# Run locally
-
-## Backend (API)
-```powershell
-npm run backend
-```
-
-This runs `python -m backend.app` via `scripts/start-backend.ps1`.
-
-Health check:
-- `http://127.0.0.1:5000/health`
-
-## Frontend
-Open a new terminal:
-```powershell
-npm run frontend:oauth
-```
-
-Frontend runs at:
-- `http://localhost:5300/`
-
+- Create `frontend/.env.local` with:
+   ```
+   VITE_API_BASE_URL=http://127.0.0.1:5000
+   ```
+- Create `backend/.env` with:
+   ```
+   GOOGLE_CLIENT_ID=YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com
+   ```
+   
 ## Quick Troubleshooting
 - If `.venv\Scripts\activate` fails, use direct Python path commands shown above.
 - If OAuth shows `origin_mismatch`, ensure the origin is exactly `http://localhost:5300`.
 - If frontend cannot reach backend, start backend first and verify `/health`.
 - If `npm run backend` says Python is missing, install Python 3.11+ and re-run the setup steps.
-
-# Deploy (Render, Single Service)
-
-This repo includes a production `Dockerfile` and `render.yaml` so frontend + backend can be deployed together.
-
-## Steps
-1. Push this repo to GitHub.
-2. In Render, choose **New +** -> **Blueprint** and connect your repo.
-3. Render will detect `render.yaml` and create the `ai-student-retention` web service.
-4. In Render service environment variables, set:
-   - `GOOGLE_CLIENT_ID` = your OAuth client id
-5. Deploy and open the service URL.
-
-Health endpoint:
-- `https://<your-render-domain>/health`
 
 # Use cases
 - Academic advisors prioritizing at-risk students
