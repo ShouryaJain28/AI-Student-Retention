@@ -1,0 +1,43 @@
+[
+  {
+    "name": "Admin User",
+    "email": "admin@example.com",
+    "role": "admin",
+    "password_hash": "scrypt:32768:8:1$E1XJpW0BZGh9aXMX$db3eb0fd6d8895f4aa17d6ad67cc1decdcd0621b651b76638e944ab37855085c95f06bcf09b06d6b792fc3c2f260df4f923ae21e78d6f122df6ba38a95ab2747"
+  },
+  {
+    "name": "Teacher User",
+    "email": "teacher@example.com",
+    "role": "teacher",
+    "password_hash": "scrypt:32768:8:1$sf6X4DY7biPQ7a1B$4b1e689bbd8cc9ba03f54cc6c12a139d3a696fed5987144e6b096385cc46a31a20747b9d888668b9fffe706996d39d3cc81a7b284dbf125540f4ead409eb14d8"
+  },
+  {
+    "name": "Aarav Sharma",
+    "email": "student@example.com",
+    "role": "student",
+    "password_hash": "scrypt:32768:8:1$h1GqXdDpErexnFWr$e09ccada740eb3196dfab50f60f0d5feec122222f22dcdc8a2e9de552fae928861ca63e356ffea1b92f78fec6ecfde6667b0e2378301385fb7583ece9a8ad9b5",
+    "student_id": 1,
+    "chat_last_seen_important_at": "2026-03-27T17:39:46.056329+00:00"
+  },
+  {
+    "name": "Priya S",
+    "email": "teacher@example.com",
+    "role": "teacher",
+    "password_hash": "scrypt:32768:8:1$O5ir8FIJ2sFmu3U0$4e51c7d79c2cfc11decf22f5497db0f2abc1f25f511e57c7cb730f55aeb46047bd274a6e0baf609b6fcd47cddb93c73c39cde9149ec07d1c960675aa99d01a61"
+  },
+  {
+    "name": "Ananya Patel 1",
+    "email": "ananyapatel11@student.com",
+    "role": "student",
+    "password_hash": "scrypt:32768:8:1$k9F3jtTxDwMftYVQ$c3cbf323aaac3edac2efbef3f67262eb0b1a9ce3060709e0f40ae716dd85ce389c675c9f83b221b5d5aebe54e5e26217000b256fce68117b608100f33614402e",
+    "student_id": 1,
+    "chat_last_seen_important_at": "2026-03-27T17:40:43.413941+00:00"
+  },
+  {
+    "name": "Gouri Chouksey",
+    "email": "gourisrishtichouksey@gmail.com",
+    "role": "student",
+    "password_hash": "scrypt:32768:8:1$XPhCOhXeNakFCbfC$05985db16813a14ad4bbe6b3829dc47096e47d193ca32a7ed325c68f815d73faf2a8a53027da2001f779af1a409955c454537df9c4971fbb904edf6018c0af3f",
+    "chat_last_seen_important_at": "2026-03-28T06:08:04.274165+00:00"
+  }
+]
