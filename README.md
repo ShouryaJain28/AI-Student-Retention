@@ -87,18 +87,15 @@ How It Works
 
 # Setup (Easy Local Setup)
 
-> Run all commands from the project root (`fosshack`) unless noted.
+> Run all commands from the project root (`AI-Student-Retention`) unless noted.
 
 ## Prerequisites
-- Python 3.11+
-- Node.js 18+
-- npm
 
 ## 1) Clone and open project
 
 ```bash
 git clone <your-repo-url>
-cd fosshack
+cd AI-Student-Retention
 ```
 
 ## 2) Install backend dependencies
@@ -120,18 +117,6 @@ cd ..
 ```
 
 ## 4) Add environment files
-<<<<<<< HEAD
-=======
-
-- Create `frontend/.env.local` with:
-   ```
-   VITE_API_BASE_URL=http://127.0.0.1:5000
-   ```
-- Create `backend/.env` with:
-   ```
-   GOOGLE_CLIENT_ID=YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com
-   ```
->>>>>>> 13fe9b1 (data files)
 
 - Create `frontend/.env.local` with:
    ```
@@ -146,12 +131,11 @@ cd ..
 - If `.venv\Scripts\activate` fails, use direct Python path commands shown above.
 - If OAuth shows `origin_mismatch`, ensure the origin is exactly `http://localhost:5300`.
 - If frontend cannot reach backend, start backend first and verify `/health`.
-- If `npm run backend` says Python is missing, install Python 3.11+ and re-run the setup steps.
+- If running the backend, use `scripts/start-backend.ps1` (PowerShell) from the project root.
+- For the frontend, use `scripts/start-frontend.ps1` (PowerShell) from the project root.
+- If `scripts/start-backend.ps1` says Python is missing, install Python 3.11+ and re-run the setup steps.
 
-<<<<<<< HEAD
-=======
 
->>>>>>> 13fe9b1 (data files)
 # Use cases
 - Academic advisors prioritizing at-risk students
 - Teachers identifying class-level risk drivers
