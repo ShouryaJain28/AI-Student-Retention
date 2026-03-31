@@ -5,6 +5,7 @@ Keeps persistence logic centralized so routes can focus on request handling.
 """
 
 import json
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -22,34 +23,87 @@ def _ensure_data_file(path: Path, default_content: Any) -> None:
         path.write_text(json.dumps(default_content, indent=2), encoding="utf-8")
 
 
+def _write_json_atomic(path: Path, payload: Any) -> None:
+    _ensure_data_file(path, [] if isinstance(payload, list) else {})
+    temp_path = path.with_suffix(path.suffix + ".tmp")
+    temp_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    temp_path.replace(path)
+
+
+def _backup_corrupted_file(path: Path) -> None:
+    timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    backup_path = path.with_suffix(path.suffix + f".corrupt-{timestamp}")
+    try:
+        path.replace(backup_path)
+    except Exception:
+        # If backup move fails, keep original file untouched.
+        return
+
+
+def _recover_list_prefix(raw_text: str) -> list[dict[str, Any]]:
+    decoder = json.JSONDecoder()
+    start = raw_text.find("[")
+    if start == -1:
+        return []
+
+    idx = start + 1
+    recovered: list[dict[str, Any]] = []
+
+    while idx < len(raw_text):
+        while idx < len(raw_text) and raw_text[idx] in {" ", "\n", "\r", "\t", ","}:
+            idx += 1
+
+        if idx >= len(raw_text) or raw_text[idx] == "]":
+            break
+
+        try:
+            value, end = decoder.raw_decode(raw_text, idx)
+        except json.JSONDecodeError:
+            break
+
+        if isinstance(value, dict):
+            recovered.append(value)
+        idx = end
+
+    return recovered
+
+
+def _load_list_with_recovery(path: Path) -> list[dict[str, Any]]:
+    _ensure_data_file(path, [])
+    raw_text = path.read_text(encoding="utf-8")
+
+    try:
+        data = json.loads(raw_text)
+        return data if isinstance(data, list) else []
+    except json.JSONDecodeError:
+        recovered = _recover_list_prefix(raw_text)
+        _backup_corrupted_file(path)
+        _write_json_atomic(path, recovered)
+        return recovered
+
+
 def load_users() -> list[dict[str, Any]]:
-    _ensure_data_file(USERS_FILE, [])
-    return json.loads(USERS_FILE.read_text(encoding="utf-8"))
+    return _load_list_with_recovery(USERS_FILE)
 
 
 def save_users(users: list[dict[str, Any]]) -> None:
-    _ensure_data_file(USERS_FILE, [])
-    USERS_FILE.write_text(json.dumps(users, indent=2), encoding="utf-8")
+    _write_json_atomic(USERS_FILE, users)
 
 
 def load_students() -> list[dict[str, Any]]:
-    _ensure_data_file(STUDENTS_FILE, [])
-    return json.loads(STUDENTS_FILE.read_text(encoding="utf-8"))
+    return _load_list_with_recovery(STUDENTS_FILE)
 
 
 def save_students(students: list[dict[str, Any]]) -> None:
-    _ensure_data_file(STUDENTS_FILE, [])
-    STUDENTS_FILE.write_text(json.dumps(students, indent=2), encoding="utf-8")
+    _write_json_atomic(STUDENTS_FILE, students)
 
 
 def load_chat_messages() -> list[dict[str, Any]]:
-    _ensure_data_file(CHAT_MESSAGES_FILE, [])
-    return json.loads(CHAT_MESSAGES_FILE.read_text(encoding="utf-8"))
+    return _load_list_with_recovery(CHAT_MESSAGES_FILE)
 
 
 def save_chat_messages(messages: list[dict[str, Any]]) -> None:
-    _ensure_data_file(CHAT_MESSAGES_FILE, [])
-    CHAT_MESSAGES_FILE.write_text(json.dumps(messages, indent=2), encoding="utf-8")
+    _write_json_atomic(CHAT_MESSAGES_FILE, messages)
 
 
 def next_student_id(students: list[dict[str, Any]]) -> int:

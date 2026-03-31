@@ -18,6 +18,19 @@ function getDefaultApiBaseUrl() {
 }
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || getDefaultApiBaseUrl()).replace(/\/$/, "");
+const SESSION_RESET_ROUTES = ["/auth/login", "/auth/signup", "/auth/google", "/auth/forgot-password", "/auth/google-config"];
+
+function clearSessionAndRedirectToLogin() {
+  if (typeof window === "undefined") return;
+
+  localStorage.removeItem("sr_token");
+  localStorage.removeItem("sr_user");
+
+  const isAlreadyOnLogin = window.location.pathname.startsWith("/login");
+  if (!isAlreadyOnLogin) {
+    window.location.replace("/login?session=expired");
+  }
+}
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
@@ -33,6 +46,21 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const status = error?.response?.status;
+    const requestUrl = String(error?.config?.url || "");
+    const shouldIgnoreSessionReset = SESSION_RESET_ROUTES.some((route) => requestUrl.includes(route));
+
+    if ((status === 401 || status === 422) && !shouldIgnoreSessionReset) {
+      clearSessionAndRedirectToLogin();
+    }
+
+    return Promise.reject(error);
+  }
+);
 
 export const authApi = {
   signup: (payload) => api.post("/auth/signup", payload),

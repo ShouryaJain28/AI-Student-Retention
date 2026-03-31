@@ -19,6 +19,10 @@ export default function LoginPage() {
     if (requestedMode === "login" || requestedMode === "signup") {
       setMode(requestedMode);
     }
+
+    if (searchParams.get("session") === "expired") {
+      toast.error("Session expired. Please sign in again.", { id: "session-expired" });
+    }
   }, [searchParams]);
 
   if (isAuthenticated) {

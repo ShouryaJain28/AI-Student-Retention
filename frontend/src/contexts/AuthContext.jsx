@@ -1,28 +1,61 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
+import { jwtDecode } from "jwt-decode";
 import { authApi } from "../api/client";
 
 const AuthContext = createContext(null);
 
+function clearStoredSession() {
+  localStorage.removeItem("sr_token");
+  localStorage.removeItem("sr_user");
+}
+
+function isTokenExpired(token) {
+  try {
+    const decoded = jwtDecode(token);
+    const exp = Number(decoded?.exp || 0);
+    if (!exp) return false;
+    return Date.now() >= exp * 1000;
+  } catch {
+    return true;
+  }
+}
+
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem("sr_token"));
+  const [token, setToken] = useState(() => {
+    const storedToken = localStorage.getItem("sr_token");
+    if (!storedToken) return null;
+    if (isTokenExpired(storedToken)) {
+      clearStoredSession();
+      return null;
+    }
+    return storedToken;
+  });
+  const [user, setUser] = useState(() => {
+    const raw = localStorage.getItem("sr_user");
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw);
+    } catch {
+      localStorage.removeItem("sr_user");
+      return null;
+    }
+  });
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const raw = localStorage.getItem("sr_user");
-    if (raw) {
-      try {
-        setUser(JSON.parse(raw));
-      } catch {
-        localStorage.removeItem("sr_user");
-      }
+    if (!token && user) {
+      setUser(null);
     }
-  }, []);
+  }, [token, user]);
 
   const saveSession = (sessionToken, sessionUser) => {
     if (!sessionToken || !sessionUser) {
       throw new Error("Invalid authentication response from server");
+    }
+    if (isTokenExpired(sessionToken)) {
+      clearStoredSession();
+      throw new Error("Session expired. Please sign in again.");
     }
     setToken(sessionToken);
     setUser(sessionUser);
@@ -33,6 +66,10 @@ export function AuthProvider({ children }) {
   const resolveAuthError = (error, fallbackMessage) => {
     const apiMessage = error?.response?.data?.error;
     if (apiMessage) return apiMessage;
+    const status = error?.response?.status;
+    if (status === 401 || status === 422) {
+      return "Session expired. Please sign in again.";
+    }
 
     if (error?.code === "ERR_NETWORK") {
       return "Cannot reach backend API. Start backend on http://127.0.0.1:5000 and try again.";
@@ -131,8 +168,7 @@ export function AuthProvider({ children }) {
   const logout = () => {
     setUser(null);
     setToken(null);
-    localStorage.removeItem("sr_token");
-    localStorage.removeItem("sr_user");
+    clearStoredSession();
     toast.success("Logged out");
   };
 
@@ -148,7 +184,7 @@ export function AuthProvider({ children }) {
       forgotPassword,
       refreshProfile,
       logout,
-      isAuthenticated: Boolean(token),
+      isAuthenticated: Boolean(token && user),
     }),
     [user, token, loading]
   );

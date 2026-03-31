@@ -22798,25 +22798,5 @@
     "recommendation": "Continue current support and monthly monitoring",
     "ai_dropout_score": 0.56,
     "ai_risk_label": "Medium"
-  },
-  {
-    "semester": 1,
-    "attendance_trend": "stable",
-    "consecutive_absences": 0,
-    "subjects": {
-      "math": 0,
-      "dbms": 0,
-      "os": 0
-    },
-    "backlogs": 0,
-    "performance_trend": "stable",
-    "assignment_submission_rate": 0.0,
-    "portal_login_frequency": 0,
-    "time_spent_on_platform": 0,
-    "stress_level": "medium",
-    "counselor_visits": 0,
-    "family_income_range": "medium",
-    "scholarship_status": "none",
-  
-  {
+  }
 ]

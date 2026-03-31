@@ -33,7 +33,9 @@ export default function DashboardPage({ showVideoSections = false, showDashboard
       const res = await analyticsApi.get();
       setAnalytics(res.data);
     } catch (error) {
-      toast.error(error?.response?.data?.error || "Failed to load analytics");
+      const status = error?.response?.status;
+      if (status === 401 || status === 422) return;
+      toast.error(error?.response?.data?.error || "Failed to load analytics", { id: "dashboard-analytics-error" });
     } finally {
       setLoading(false);
     }
