@@ -1,4 +1,4 @@
-# AI-Student-Retention
+# Student-Retento
 
 # What is it
 An AI-Driven Student Retention & Adaptive Counseling System that predicts dropout risk, highlights likely reasons, recommends actions, and helps track interventions over time.
