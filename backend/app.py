@@ -7,6 +7,7 @@ and route blueprints in one place.
 
 import os
 import logging
+import re
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -61,6 +62,25 @@ def _build_risk_model() -> object:
         return _HeuristicRiskModel()
 
 
+def _safe_int_env(name: str, default: int) -> int:
+    raw_value = str(os.getenv(name, "")).strip()
+    if not raw_value:
+        return default
+
+    try:
+        return int(raw_value)
+    except ValueError:
+        match = re.search(r"-?\d+", raw_value)
+        if match:
+            try:
+                return int(match.group(0))
+            except ValueError:
+                pass
+
+    logging.warning("Invalid integer env value for %s=%r. Falling back to default=%s", name, raw_value, default)
+    return default
+
+
 def create_app() -> Flask:
     # Load backend-local environment variables (backend/.env).
     env_path = Path(__file__).resolve().parent / ".env"
@@ -72,7 +92,7 @@ def create_app() -> Flask:
     app = Flask(__name__, static_folder=str(frontend_dist), static_url_path="/")
     # Core security and token configuration.
     app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "change-this-in-production-min-32-characters")
-    app.config["JWT_ACCESS_TOKEN_EXPIRES"] = int(os.getenv("JWT_EXPIRES_SEC", "86400"))
+    app.config["JWT_ACCESS_TOKEN_EXPIRES"] = _safe_int_env("JWT_EXPIRES_SEC", 86400)
 
     # Allow frontend(s) configured in CORS_ORIGINS to access this API.
     CORS(app, resources={r"/*": {"origins": os.getenv("CORS_ORIGINS", "*").split(",")}})
@@ -116,6 +136,6 @@ def create_app() -> Flask:
 
 if __name__ == "__main__":
     flask_app = create_app()
-    port = int(os.getenv("PORT", "5000"))
+    port = _safe_int_env("PORT", 5000)
     # Use FLASK_DEBUG=true only for local development.
     flask_app.run(host="0.0.0.0", port=port, debug=os.getenv("FLASK_DEBUG", "false").lower() == "true")
