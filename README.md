@@ -135,6 +135,22 @@ cd ..
 - For the frontend, use `scripts/start-frontend.ps1` (PowerShell) from the project root.
 - If `scripts/start-backend.ps1` says Python is missing, install Python 3.11+ and re-run the setup steps.
 
+## Deployment (Render)
+
+This repo supports one-service deployment where Flask serves both API and built React frontend.
+
+1) Push the latest code to GitHub.
+2) In Render, create a **Blueprint** and select this repo.
+3) Render auto-detects `render.yaml` and creates the web service.
+4) Set `GOOGLE_CLIENT_ID` in Render environment variables (optional, only for Google login).
+5) Deploy and open:
+   - `https://<your-service>.onrender.com/health`
+   - `https://<your-service>.onrender.com`
+
+Notes:
+- Production uses `gunicorn` via `Dockerfile`.
+- If you need persistent app-written data (`backend/data/*.json`), attach a persistent disk and mount it at `/app/backend/data`.
+
 
 # Use cases
 - Academic advisors prioritizing at-risk students

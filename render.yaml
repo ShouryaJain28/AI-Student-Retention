@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: ai-student-retention
+    env: docker
+    autoDeploy: true
+    healthCheckPath: /health
+    envVars:
+      - key: FLASK_DEBUG
+        value: "false"
+      - key: JWT_EXPIRES_SEC
+        value: "86400"
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: GOOGLE_CLIENT_ID
+        sync: false
