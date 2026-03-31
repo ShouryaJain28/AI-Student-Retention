@@ -22,6 +22,7 @@ auth_bp = Blueprint("auth", __name__)
 ALLOWED_DOC_EXTENSIONS = {"pdf", "png", "jpg", "jpeg", "doc", "docx", "txt"}
 ALLOWED_ROLES = {"student", "teacher", "admin"}
 LEGACY_SHA256_PATTERN = re.compile(r"^[a-f0-9]{64}$")
+GOOGLE_CLIENT_ID_PATTERN = re.compile(r"^[\w-]+\.apps\.googleusercontent\.com$")
 ROOT = Path(__file__).resolve().parents[1]
 UPLOADS_DIR = ROOT / "data" / "documents"
 
@@ -109,6 +110,28 @@ def _google_audience_matches(audience: Any, expected_client_id: str) -> bool:
     return str(audience or "").strip() == expected_client_id
 
 
+def _read_google_client_id() -> str:
+    raw = str(os.getenv("GOOGLE_CLIENT_ID", "")).strip().strip("\"'").strip()
+    if not raw:
+        return ""
+
+    # Allow accidental env values like "GOOGLE_CLIENT_ID=xxxx.apps.googleusercontent.com".
+    if "=" in raw:
+        maybe_key, maybe_value = raw.split("=", 1)
+        if maybe_key.strip().upper() == "GOOGLE_CLIENT_ID":
+            raw = maybe_value.strip().strip("\"'").strip()
+
+    # If multiple values are accidentally pasted, keep the first non-empty token.
+    first_token = next((token.strip() for token in re.split(r"[\s,]+", raw) if token.strip()), "")
+    if not first_token:
+        return ""
+
+    if not GOOGLE_CLIENT_ID_PATTERN.fullmatch(first_token):
+        return ""
+
+    return first_token
+
+
 def _infer_student_id(email: str, name: str) -> int | None:
     students = load_students()
     normalized_email = str(email or "").strip().lower()
@@ -149,7 +172,7 @@ def _infer_student_id(email: str, name: str) -> int | None:
 
 @auth_bp.get("/google-config")
 def google_config() -> Any:
-    client_id = str(os.getenv("GOOGLE_CLIENT_ID", "")).strip()
+    client_id = _read_google_client_id()
     return jsonify({"enabled": bool(client_id), "clientId": client_id})
 
 
@@ -259,7 +282,7 @@ def login_google() -> Any:
         return jsonify({"error": "Missing Google token"}), 400
 
     token_claims = _decode_jwt_payload_without_verification(token)
-    configured_client_id = str(os.getenv("GOOGLE_CLIENT_ID", "")).strip()
+    configured_client_id = _read_google_client_id()
 
     if token_claims and configured_client_id and not _google_audience_matches(token_claims.get("aud"), configured_client_id):
         return jsonify({"error": "Invalid Google token audience"}), 401
