@@ -6,6 +6,8 @@ and route blueprints in one place.
 """
 
 import os
+import logging
+from dataclasses import dataclass
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -13,12 +15,50 @@ from flask import Flask, jsonify, send_from_directory
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 
-from .model.risk_model import StudentRiskModel
 from .routes.analytics_routes import analytics_bp
 from .routes.auth_routes import auth_bp
 from .routes.chat_routes import chat_bp
 from .routes.predict_routes import predict_bp
 from .routes.students_routes import students_bp
+
+
+@dataclass
+class _PredictionResult:
+    risk_level: str
+    probability: float
+    recommendation: str
+
+
+class _HeuristicRiskModel:
+    """Lightweight fallback model for constrained runtimes."""
+
+    def predict(self, attendance_pct: float, marks: float, behavior_score: float) -> _PredictionResult:
+        attendance = max(0.0, min(100.0, float(attendance_pct)))
+        marks_value = max(0.0, min(100.0, float(marks)))
+        behavior = max(0.0, min(1.0, float(behavior_score)))
+
+        risk = ((100 - attendance) * 0.45 + (100 - marks_value) * 0.35 + ((1 - behavior) * 100) * 0.2) / 100
+        probability = max(0.01, min(0.99, round(risk, 4)))
+
+        if probability >= 0.7:
+            return _PredictionResult("High", probability, "Urgent 1:1 mentoring and parent engagement within 48 hours")
+        if probability >= 0.4:
+            return _PredictionResult("Medium", probability, "Weekly check-ins, tutoring, and attendance follow-up")
+        return _PredictionResult("Low", probability, "Continue current support and monthly monitoring")
+
+
+def _build_risk_model() -> object:
+    mode = str(os.getenv("RISK_MODEL_BACKEND", "auto")).strip().lower()
+    if mode == "heuristic":
+        return _HeuristicRiskModel()
+
+    try:
+        from .model.risk_model import StudentRiskModel
+
+        return StudentRiskModel()
+    except Exception:
+        logging.exception("Failed to initialize sklearn model. Falling back to heuristic risk model.")
+        return _HeuristicRiskModel()
 
 
 def create_app() -> Flask:
@@ -39,7 +79,7 @@ def create_app() -> Flask:
     JWTManager(app)
 
     # Initialize and cache the ML model once at app startup.
-    app.config["risk_model"] = StudentRiskModel()
+    app.config["risk_model"] = _build_risk_model()
 
     # Register API modules.
     app.register_blueprint(auth_bp, url_prefix="/auth")

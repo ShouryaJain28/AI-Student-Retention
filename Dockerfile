@@ -26,4 +26,4 @@ COPY --from=frontend-build /app/frontend/dist /app/frontend/dist
 
 EXPOSE 5000
 
-CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:${PORT:-5000} --workers 2 --threads 4 --timeout 120 'backend.app:create_app()'"]
+CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:${PORT:-5000} --workers 1 --threads 2 --timeout 120 'backend.app:create_app()'"]
